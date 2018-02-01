@@ -1,0 +1,23 @@
+--cpu Cortex-M0+
+".\objects\main.o"
+".\objects\startup_skeaz1284.o"
+".\objects\system_skeaz1284.o"
+".\objects\drv_gpio.o"
+".\objects\drv_pit.o"
+".\objects\drv_uart.o"
+".\objects\drv_rcc.o"
+".\objects\drv_adc.o"
+".\objects\drv_acmp.o"
+".\objects\drv_flash.o"
+".\objects\drv_ftm.o"
+".\objects\drv_irq.o"
+".\objects\drv_power.o"
+".\objects\drv_pwt.o"
+".\objects\drv_rtc.o"
+".\objects\drv_spi.o"
+".\objects\drv_wdog.o"
+".\objects\bsp_led.o"
+--strict --scatter ".\Objects\LED.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\LED.map" -o .\Objects\LED.axf
