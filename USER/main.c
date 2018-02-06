@@ -12,19 +12,19 @@ int main(void)
 	ICS_S |= ICS_S_LOCK_MASK ; 			/* Clear Loss of lock sticky bit */	
 	
 	
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_B1;
-//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-//	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
-//	drv_gpio_Init(PORTB, &GPIO_InitStruct);
-//	
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_E5;
-//	drv_gpio_Init(PORTE, &GPIO_InitStruct);
-//	
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_E0;
-//	drv_gpio_Init(PORTE, &GPIO_InitStruct);
-//	
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_D2;
-//	drv_gpio_Init(PORTD, &GPIO_InitStruct);
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_B1;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	drv_gpio_Init(PORTB, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_E5;
+	drv_gpio_Init(PORTE, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_E0;
+	drv_gpio_Init(PORTE, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_D2;
+	drv_gpio_Init(PORTD, &GPIO_InitStruct);
 	
 	while(1)
 	{
@@ -32,10 +32,10 @@ int main(void)
 		if(cnt %40000 == 0)
 		{
 			cnt = 0;
-//			drv_gpio_TogglePin(PORTB, GPIO_Pin_B1);
-//			drv_gpio_TogglePin(PORTE, GPIO_Pin_E5);
+			drv_gpio_TogglePin(PORTB, GPIO_Pin_B1);
+			drv_gpio_TogglePin(PORTE, GPIO_Pin_E5);
 //			drv_gpio_TogglePin(PORTE, GPIO_Pin_E0);
-//			drv_gpio_TogglePin(PORTD, GPIO_Pin_D2);
+			drv_gpio_TogglePin(PORTD, GPIO_Pin_D2);
 		}
 	}
 }
