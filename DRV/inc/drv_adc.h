@@ -47,16 +47,29 @@
 #define ADC_Resolution_12b                         ((uint32_t)0x00000008)
 #define ADC_Resolution_10b                         ((uint32_t)0x00000004)
 #define ADC_Resolution_8b                          ((uint32_t)0x00000000)
+typedef enum
+{
+	ADC_FIFO_Disable = 0,
+	ADC_FIFO_Level_2,
+	ADC_FIFO_Level_3,
+	ADC_FIFO_Level_4,
+	ADC_FIFO_Level_5,
+	ADC_FIFO_Level_6,
+	ADC_FIFO_Level_7,
+	ADC_FIFO_Level_8,
+}ADCFIFO_TypeDef;
 
 typedef struct
 {
 	uint16_t ADC_Channel;											/*  ADC 通道  */
+	uint8_t ADC_FIFOLevel;										/*  ADC FIFO深度  */
+	uint8_t ADC_IRQCmd;												/*  是否开启中断  */
 	uint32_t ADC_Resolution;									/*  ADC数据位数  */
   FunctionalState ADC_ScanConvMode;					/*  扫描模式  */
 	FunctionalState ADC_ContinuousConvMode;		/*  连续转换  */
-	uint32_t ADC_TwoSamplingDelay;						/*  采样间隔  */
+//	uint32_t ADC_TwoSamplingDelay;					/*  采样间隔  */
 	uint32_t ADC_Prescaler;										/*  ADC时钟分频  */
-	uint32_t ADC_ExternalTrigConvEdge;				/*  外部触发采样  */
+	uint32_t ADC_TrigConvMode;								/*  ADC采样触发模式  */
 }ADC_InitTypeDef;
 
 

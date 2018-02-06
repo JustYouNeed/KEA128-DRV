@@ -1,4 +1,4 @@
-Component: ARM Compiler 5.06 update 4 (build 422) Tool: armlink [4d35d2]
+Component: ARM Compiler 5.06 update 3 (build 300) Tool: armlink [4d35c9]
 
 ==============================================================================
 
@@ -177,12 +177,12 @@ Removing Unused input sections from the image.
     Removing drv_rcc.o(i.drv_rcc_ClockCmd), (32 bytes).
     Removing drv_adc.o(.rev16_text), (4 bytes).
     Removing drv_adc.o(.revsh_text), (4 bytes).
-    Removing drv_adc.o(i.drv_adc_Init), (68 bytes).
+    Removing drv_adc.o(i.drv_adc_Init), (188 bytes).
     Removing bsp_led.o(.rev16_text), (4 bytes).
     Removing bsp_led.o(.revsh_text), (4 bytes).
     Removing bsp_led.o(i.bsp_led_Config), (2 bytes).
 
-36 unused section(s) (total 1172 bytes) removed from the image.
+36 unused section(s) (total 1292 bytes) removed from the image.
 
 ==============================================================================
 
@@ -603,15 +603,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       340          8          0          0          0       1481   drv_gpio.o
-       104         20          0          8          0       1854   drv_pit.o
-         6          0          0          0          0       1209   drv_uart.o
-       184         12          0          0          0     110063   main.o
-        80         44        192          0        256        852   startup_skeaz1284.o
-       112         22          0          0          0        457   system_skeaz1284.o
+       340          8          0          0          0       1505   drv_gpio.o
+       104         20          0          8          0       1894   drv_pit.o
+         6          0          0          0          0       1245   drv_uart.o
+       184         12          0          0          0     110011   main.o
+        80         44        192          0        256        860   startup_skeaz1284.o
+       112         22          0          0          0        465   system_skeaz1284.o
 
     ----------------------------------------------------------------------
-       852        106        224          8        256     115916   Object Totals
+       852        106        224          8        256     115980   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         26          0          0          0          0          0   (incl. Padding)
 
@@ -661,8 +661,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      1472        122        224          8        352     116104   Grand Totals
-      1472        122        224          8        352     116104   ELF Image Totals
+      1472        122        224          8        352     116168   Grand Totals
+      1472        122        224          8        352     116168   ELF Image Totals
       1472        122        224          8          0          0   ROM Totals
 
 ==============================================================================

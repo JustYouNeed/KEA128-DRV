@@ -533,10 +533,10 @@ ARM Macro Assembler    Page 9
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0+ --apcs=inter
 work --depend=.\objects\startup_skeaz1284.d -o.\objects\startup_skeaz1284.o -IE
-:\学习资料\单片机\KEA128\程序\LED\USER\RTE\_LED -I"D:\Program Files\Keil\ARM\PA
-CK\Keil\Kinetis_KEAxx_DFP\1.3.0\Device\Include" -I"D:\Program Files\Keil\ARM\CM
-SIS\Include" --predefine="__UVISION_VERSION SETA 522" --predefine="SKEAZ128xxx4
- SETA 1" --list=.\listings\startup_skeaz1284.lst ..\CORE\startup_SKEAZ1284.s
+:\学习资料\单片机\KEA128\程序\驱动调试\USER\RTE -ID:\KeilPack\Keil\Kinetis_KEAx
+x_DFP\1.3.0\Device\Include -IC:\Keil_v5\ARM\CMSIS\Include --predefine="__UVISIO
+N_VERSION SETA 521" --predefine="SKEAZ128xxx4 SETA 1" --list=.\listings\startup
+_skeaz1284.lst ..\CORE\startup_SKEAZ1284.s
 
 
 

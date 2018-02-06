@@ -162,3 +162,4 @@ void drv_gpio_TogglePin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
 }
 
 /********************************************  END OF FILE  *******************************************/
+
