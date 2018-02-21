@@ -10,6 +10,10 @@
   *		1.Data: 2018-2-1
   *     Author: Vector
   *     Mod: 建立文件,添加基本函数
+	*		
+	*		2.Data: 2018-2-9
+	*			Author:	Vector
+	*			Mod: 添加新函数drv_gpio_PinAFConfig,用于设置引脚的复用功能
   *
   *******************************************************************************************************
   */
@@ -130,9 +134,9 @@ uint8_t drv_gpio_ReadPin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, FunctionalState NewState)
+void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, GPIO_PinState PinState)
 {
-	if(NewState == RESET)  /*  如果设置低电平  */
+	if(PinState == GPIO_PIN_RESET)  /*  如果设置低电平  */
 	{
 		PORTx->PCOR |= 1 << GPIO_Pin;
 	}
@@ -159,6 +163,58 @@ void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, FunctionalState NewSt
 void drv_gpio_TogglePin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
 {
 	PORTx->PTOR |= 1 << GPIO_Pin;		/*  PORTx->PTOR寄存器,跳变寄存器  */
+}
+
+
+/*
+*********************************************************************************************************
+*                                    drv_gpio_PinAFConfig      
+*
+* Description: 设置引脚的复用功能
+*             
+* Arguments  : 1> GPIO_PinSource: GPIO引脚资源,在drv_gpio.h中有所有引脚资源的定义
+*              2> GPIO_AF       : 要复用的功能,在drv_gpio.h中有所有复用功能的定义
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+void drv_gpio_PinAFConfig(uint8_t GPIO_PinSource, uint16_t GPIO_AF)
+{
+	uint8_t reg = 0;
+	uint8_t bit = 0;
+	uint8_t clrbit = 0;
+	reg = (uint8_t)(GPIO_AF >> 8);		/*  获取寄存器号  */
+	bit = (uint8_t)(GPIO_AF);					/*  获取需要设置的寄存器位置  */
+	
+	switch(GPIO_AF)				/*  因为不同的复用功能占用的位数不一样  */
+	{
+		case GPIO_AF_FTM0_CH0:
+		case GPIO_AF_FTM0_CH1:
+		case GPIO_AF_FTM1_CH0:
+		case GPIO_AF_FTM1_CH1:
+		case GPIO_AF_PWT_IN0:
+		case GPIO_AF_PWT_IN1:
+		case GPIO_AF_FTM2_CH4:
+		case GPIO_AF_FTM2_CH5:
+		case GPIO_AF_RTCO:clrbit = 1;break;		/*  只占用一位  */
+		case GPIO_AF_FTM2_CH0:
+		case GPIO_AF_FTM2_CH1:
+		case GPIO_AF_FTM2_CH2:
+		case GPIO_AF_FTM2_CH3: clrbit = 3;break;	/*  占用两位  */
+		case GPIO_AF_IRQ: clrbit = 7; break;			/*  占用三位  */
+	}
+	if(reg == 0)			/*  在PINSEL0寄存器里面  */
+	{
+		SIM->PINSEL &= ~(clrbit << bit);		/*  先清除设置  */
+		SIM->PINSEL |= GPIO_PinSource << bit;
+	}
+	else							/*  在PINSEL1寄存器里面  */
+	{
+		SIM->PINSEL1 &= ~(clrbit << bit);		/*  先清除设置  */
+		SIM->PINSEL1 |= GPIO_PinSource << bit;
+	}
 }
 
 /********************************************  END OF FILE  *******************************************/

@@ -43,7 +43,7 @@
 
 #define DISABLE_WDOG    1
 
-#define CLOCK_SETUP     0
+#define CLOCK_SETUP     1
 /* Predefined clock setups
    0 ... Internal Clock Source (ICS) in FLL Engaged Internal (FEI) mode
          Default  part configuration.
@@ -91,6 +91,8 @@
    ---------------------------------------------------------------------------- */
 
 uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
+uint32_t SystemBusClock = DEFAULT_SYSTEM_CLOCK /2;
+uint32_t SystemTimerClock = DEFAULT_SYSTEM_CLOCK /2;
 
 /* ----------------------------------------------------------------------------
    -- SystemInit()
@@ -198,7 +200,8 @@ void SystemInit (void) {
   while((ICS->S & 0x0CU) != 0x08U) {    /* Wait until external reference clock is selected as ICS output */
   }
 #endif
-
+	SystemBusClock = SystemCoreClock / 2;
+	SystemTimerClock = SystemCoreClock / 2;
 }
 
 /* ----------------------------------------------------------------------------
@@ -236,5 +239,4 @@ void SystemCoreClockUpdate (void) {
   }
   ICSOUTClock = ICSOUTClock >> ((ICS->C2 & ICS_C2_BDIV_MASK) >> ICS_C2_BDIV_SHIFT);
   SystemCoreClock = (ICSOUTClock / (1u + ((SIM->CLKDIV & SIM_CLKDIV_OUTDIV1_MASK) >> SIM_CLKDIV_OUTDIV1_SHIFT)));
-
 }

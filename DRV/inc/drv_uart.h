@@ -30,6 +30,7 @@
 #define UART_Parity_Odd                     ((uint8_t)0x03) 
 
 #define UART_StopBits_1                     ((uint8_t)0x00)
+#define UART_StopBits_2											((uint8_t)0x01)
 
 #define UART_WordLength_8b                  ((uint8_t)0x00)
 #define UART_WordLength_9b                  ((uint8_t)0x10)

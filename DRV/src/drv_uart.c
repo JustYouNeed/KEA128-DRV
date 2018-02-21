@@ -1,6 +1,25 @@
+/**
+  *******************************************************************************************************
+  * File Name: drv_uart.c
+  * Author: Vector
+  * Version: V1.0.0
+  * Date: 2018-2-1
+  * Brief: KEA128芯片串口底层驱动函数
+  *******************************************************************************************************
+  * History
+  *		1.Data: 2018-2-1
+  *     Author: Vector
+  *     Mod: 建立文件,添加基本函数
+  *
+  *******************************************************************************************************
+  */
+
+/*
+  *******************************************************************************************************
+  *                              INCLUDE FILES
+  *******************************************************************************************************
+*/
 # include "drv_uart.h"
-# include "drv_rcc.h"
-# include "drv_gpio.h"
 
 
 /*
@@ -20,7 +39,7 @@
 uint32_t drv_uart_Init(UART_Type *UARTx, UART_InitTypeDef *UART_InitStruct)
 {
 	volatile uint32_t uart_clk;
-	uint32_t sbr;
+	uint16_t sbr;
 	
 	/*  打开时钟  */
 	if(UARTx == UART0) drv_rcc_ClockCmd(RCC_PeriphClock_UART0, ENABLE);
@@ -35,8 +54,9 @@ uint32_t drv_uart_Init(UART_Type *UARTx, UART_InitTypeDef *UART_InitStruct)
 	UARTx->C1 |= UART_InitStruct->UART_WordLength;	/*  设置数据长度  */
 	UARTx->C1 |= UART_InitStruct->UART_StopBits;		/*  设置停止位  */
 	
-	uart_clk = 20000 * 1000;
-	sbr = (((uart_clk >> 4)* 10 ) / UART_InitStruct->UART_BaudRate + 5) / 10;
+	//UART波特率 = UART模块时钟/(16 X (SBR[12:0]))
+	uart_clk = SystemBusClock;
+	sbr = (uint16_t)(((uart_clk >> 4) + (UART_InitStruct->UART_BaudRate >> 1)) / UART_InitStruct->UART_BaudRate);
 	if(sbr > 0x1fff) sbr = 0x1fff;
 	
 	UARTx->BDH &= ~UART_BDH_SBR_MASK;				/*  清空波特率寄存器  */
@@ -212,7 +232,7 @@ FlagStatus drv_uart_GetITStatus(UART_Type *UARTx, uint16_t UART_IT)
 */
 void drv_uart_SendData(UART_Type *UARTx, uint8_t data)
 {
-	UARTx->D = (data & 0xff); /*  读取数据寄存器  */
+	UARTx->D = (data & 0xff); /*  写入数据寄存器  */
 }
 
 /*
@@ -247,10 +267,10 @@ uint8_t drv_uart_ReceiveData(UART_Type *UARTx)
 * Note(s)    : 
 *********************************************************************************************************
 */
-void UART0_IRQHandler(void)
-{
-	
-}
+//void UART0_IRQHandler(void)
+//{
+//	
+//}
 
 
 /*
@@ -289,5 +309,6 @@ void UART2_IRQHandler(void)
 {
 	
 }
+
 
 /********************************************  END OF FILE  *******************************************/

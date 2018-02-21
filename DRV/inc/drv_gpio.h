@@ -10,6 +10,14 @@
   *		1.Date: 2018-2-1
   *			Author: Vector
   *			Mod: 建立文件
+	*
+	*		2.Data: 2018-2-9
+	*     Author: Vector
+	*     Mod: 添加引脚资源的定义,以及引脚复用功能的定义
+	*
+	*		3.Data: 2018-2-17
+	*			Author:	Vector
+	*			Mod:	新增引脚状态枚举变量,修复设置引脚状态函数错误
   *
   *******************************************************************************************************
   */
@@ -33,6 +41,79 @@
 #define PORTH	 GPIOB
  
 #define PORTI	 GPIOC
+
+/*  引脚资源的定义  */
+# define GPIO_PinSource_F0	(uint8_t)0x02
+# define GPIO_PinSource_H0	(uint8_t)0x01
+# define GPIO_PinSource_C0	(uint8_t)0x00
+
+# define GPIO_PinSource_C1	(uint8_t)0x00
+# define GPIO_PinSource_H1	(uint8_t)0x01
+# define GPIO_PinSource_F1	(uint8_t)0x02
+
+# define GPIO_PinSource_C2	(uint8_t)0x00
+# define GPIO_PinSource_D0	(uint8_t)0x01
+# define GPIO_PinSource_G4	(uint8_t)0x02
+
+# define GPIO_PinSource_C3	(uint8_t)0x00
+# define GPIO_PinSource_D1	(uint8_t)0x01
+# define GPIO_PinSource_G5	(uint8_t)0x02
+
+# define GPIO_PinSource_B4	(uint8_t)0x00
+# define GPIO_PinSource_G6	(uint8_t)0x01
+
+# define GPIO_PinSource_B5	(uint8_t)0x00
+# define GPIO_PinSource_G7	(uint8_t)0x01
+
+# define GPIO_PinSource_D5	(uint8_t)0x00
+# define GPIO_PinSource_E2	(uint8_t)0x01
+
+# define GPIO_PinSource_B0	(uint8_t)0x00
+# define GPIO_PinSource_H7	(uint8_t)0x00
+
+# define GPIO_PinSource_A5	(uint8_t)0x00
+# define GPIO_PinSource_I0	(uint8_t)0x01
+# define GPIO_PinSource_I1	(uint8_t)0x02
+# define GPIO_PinSource_I2	(uint8_t)0x03
+# define GPIO_PinSource_I3	(uint8_t)0x04
+# define GPIO_PinSource_I4	(uint8_t)0x05
+# define GPIO_PinSource_I5	(uint8_t)0x06
+# define GPIO_PinSource_I6	(uint8_t)0x07
+
+# define GPIO_PinSource_C4	(uint8_t)0x00
+# define GPIO_PinSource_C5	(uint8_t)0x01
+
+# define GPIO_PinSource_A0	(uint8_t)0x00
+# define GPIO_PinSource_B2	(uint8_t)0x01
+
+# define GPIO_PinSource_A1	(uint8_t)0x00
+# define GPIO_PinSource_B3	(uint8_t)0x01
+
+# define GPIO_PinSource_C4	(uint8_t)0x00
+# define GPIO_PinSource_H2	(uint8_t)0x01
+
+# define GPIO_PinSource_E7	(uint8_t)0x01
+
+
+/*  引脚复用功能定义  */
+# define GPIO_AF_FTM0_CH0		(uint16_t)0x0008
+# define GPIO_AF_FTM0_CH1		(uint16_t)0x0009
+
+# define GPIO_AF_FTM1_CH0		(uint16_t)0x000a
+# define GPIO_AF_FTM1_CH1		(uint16_t)0x000b
+
+# define GPIO_AF_FTM2_CH0		(uint16_t)0x0100
+# define GPIO_AF_FTM2_CH1		(uint16_t)0x0102
+# define GPIO_AF_FTM2_CH2		(uint16_t)0x0104
+# define GPIO_AF_FTM2_CH3		(uint16_t)0x0106
+# define GPIO_AF_FTM2_CH4		(uint16_t)0x0108
+# define GPIO_AF_FTM2_CH5		(uint16_t)0x0109
+
+# define GPIO_AF_PWT_IN0		(uint16_t)0x010e
+# define GPIO_AF_PWT_IN1		(uint16_t)0x010f
+
+# define GPIO_AF_IRQ				(uint16_t)0x0000
+# define GPIO_AF_RTCO				(uint16_t)0x0004
 
 
 /*  引脚初始化结构体  */
@@ -155,12 +236,19 @@ typedef enum
 	GPIO_Pin_I7,
 }GPIOCPin_TypeDef;
 
+/*  GPIO引脚状态枚举变量  */
+typedef enum
+{
+  GPIO_PIN_RESET = 0,
+  GPIO_PIN_SET
+}GPIO_PinState;
 
 /*  供外部使用的GPIO引脚操作函数  */
 void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct);
 uint8_t drv_gpio_ReadPin(GPIO_Type *PORTx, uint8_t GPIO_Pin);
-void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, FunctionalState NewState);
+void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, GPIO_PinState PinState);
 void drv_gpio_TogglePin(GPIO_Type *PORTx, uint8_t GPIO_Pin);
+void drv_gpio_PinAFConfig(uint8_t GPIO_PinSource, uint16_t GPIO_AF);
 
 # endif
 

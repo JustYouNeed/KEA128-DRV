@@ -430,6 +430,11 @@
               <FilePath>..\DRV\src\drv_adc.c</FilePath>
             </File>
             <File>
+              <FileName>drv_ftm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DRV\src\drv_ftm.c</FilePath>
+            </File>
+            <File>
               <FileName>drv_acmp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DRV\src\drv_acmp.c</FilePath>
@@ -438,11 +443,6 @@
               <FileName>drv_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DRV\src\drv_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>drv_ftm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DRV\src\drv_ftm.c</FilePath>
             </File>
             <File>
               <FileName>drv_irq.c</FileName>
@@ -483,6 +483,21 @@
               <FileName>bsp_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\src\bsp_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp_key.c</FilePath>
             </File>
           </Files>
         </Group>
