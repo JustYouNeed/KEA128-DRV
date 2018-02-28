@@ -2,23 +2,31 @@
   *******************************************************************************************************
   * File Name: drv_pit.c
   * Author: Vector
-  * Version: V1.0.0
+  * Version: V2.2.0
   * Date: 2018-2-1
   * Brief: KEA128芯片GPIO底层驱动函数
   *******************************************************************************************************
   * History
-  *		1.Data: 2018-2-1
+  *		1.Date: 2018-2-1
   *     Author: Vector
   *     Mod: 建立文件,添加基本函数
 	*		
-	*		2.Data: 2018-2-9
+	*		2.Date: 2018-2-9
 	*			Author:	Vector
 	*			Mod: 添加新函数drv_gpio_PinAFConfig,用于设置引脚的复用功能
+	*
+	*		3.Date:2018-2-28
+	*			Author: Vector
+	*			Mod: 1.添加新函数drv_gpio_PullCmd,用于设置引脚的上拉电阻
+	*					 2.修改引脚初始化逻辑,添加GPIO端口数组GPIOX[],
+	*	
   *
   *******************************************************************************************************
   */
 	
 # include "drv_gpio.h"
+
+static GPIO_Type * const GPIOX[] = GPIO_BASES;
 
 /*
 *********************************************************************************************************
@@ -26,37 +34,42 @@
 *
 * Description: 初始化一个GPIO引脚
 *             
-* Arguments  : 1> PORTx: GPIO端口指针, PORTA~PORTI
-*              2> GPIO_InitStruct: GPIO引脚配置结构体指针
+* Arguments  : 1> GPIO_InitStruct: GPIO引脚配置结构体指针
 *
 * Reutrn     : None.
 *
 * Note(s)    : 一次只能配置一个引脚
 *********************************************************************************************************
 */
-void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct)
+void drv_gpio_Init(GPIO_InitTypeDef *GPIO_InitStruct)
 {
-	PORTx->PIDR |= ((uint32_t)1 << GPIO_InitStruct->GPIO_Pin);	/*  先禁止输入  */
+	uint8_t gpiox = 0, pinx = 0;
+	uint8_t pintemp = GPIO_InitStruct->GPIO_Pin;
+	
+	gpiox = (uint8_t)(pintemp>>5);		/*  计算出GPIO端口  */
+	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
+	
+	GPIOX[gpiox]->PIDR |= ((uint32_t)1 << pinx);	/*  先禁止输入  */
 	
 	/*  配置端口数据方向寄存器,配置为相应的输入/输出模式  */
-	PORTx->PDDR |= (GPIO_InitStruct->GPIO_Mode << GPIO_InitStruct->GPIO_Pin);
+	GPIOX[gpiox]->PDDR |= (GPIO_InitStruct->GPIO_Mode << pinx);
 		
 	if(GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IN)		/*  如果设置为输入则开启输入功能  */
-		PORTx->PIDR &= ~((uint32_t)1 << GPIO_InitStruct->GPIO_Pin);
+		GPIOX[gpiox]->PIDR &= ~((uint32_t)1 << pinx);
 	
 	/*  如果开启了上拉  */
 	if(GPIO_InitStruct->GPIO_PuPd == GPIO_PuPd_UP)
 	{
 		/*  GPIOA,GPIOB,及其他配置的寄存器不同  */
-		if(GPIOA == PORTx) PORT->PUE0 |= 1 << GPIO_InitStruct->GPIO_Pin;
-		else if(GPIOB == PORTx) PORT->PUE1 |= 1 << GPIO_InitStruct->GPIO_Pin;
-		else	PORT->PUE2 |= 1 << GPIO_InitStruct->GPIO_Pin;
+		if(GPIOA == GPIOX[gpiox]) PORT->PUE0 |= 1 << pinx;
+		else if(GPIOB == GPIOX[gpiox]) PORT->PUE1 |= 1 << pinx;
+		else	if(GPIOC == GPIOX[gpiox])PORT->PUE2 |= 1 << pinx;
 	}
 	
 	/*  大电流驱动能力只有固定的几个引脚有  */
 	if(GPIO_InitStruct->GPIO_HDrv == ENABLE)
 	{
-		if(PORTx == PORTH)
+		if(GPIOX[gpiox] == PORTH)
 		{
 			switch(GPIO_InitStruct->GPIO_Pin)
 			{
@@ -65,7 +78,7 @@ void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct)
 				default: break;
 			}
 		}
-		if(PORTx == PORTE)
+		if(GPIOX[gpiox] == PORTE)
 		{
 			switch(GPIO_InitStruct->GPIO_Pin)
 			{
@@ -74,7 +87,7 @@ void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct)
 				default: break;
 			}
 		}
-		if(PORTx == PORTD)
+		if(GPIOX[gpiox] == PORTD)
 		{
 			switch(GPIO_InitStruct->GPIO_Pin)
 			{
@@ -83,7 +96,7 @@ void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct)
 				default: break;
 			}
 		}
-		if(PORTx == PORTB)
+		if(GPIOX[gpiox] == PORTB)
 		{
 			switch(GPIO_InitStruct->GPIO_Pin)
 			{
@@ -101,20 +114,25 @@ void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct)
 *
 * Description: 读取一个引脚的电平值
 *             
-* Arguments  : 1> PORTx: GPIO端口指针, PORTA~PORTI
-*              2> GPIO_Pin: 引脚编号
+* Arguments  : 1> GPIO_Pin: 引脚编号
 *
 * Reutrn     : 引脚电平
 *
 * Note(s)    : None.
 *********************************************************************************************************
 */
-uint8_t drv_gpio_ReadPin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
+uint8_t drv_gpio_ReadPin(uint8_t GPIO_Pin)
 {
 	uint8_t pin;
 	
+	uint8_t gpiox = 0, pinx = 0;
+	uint8_t pintemp = GPIO_Pin;
+	
+	gpiox = (uint8_t)(pintemp>>5);		/*  计算出GPIO端口  */
+	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
+	
 	/*  读取引脚电平  */
-	pin = PORTx->PDIR & GPIO_PDIR_PDI(1 << GPIO_Pin);
+	pin = GPIOX[gpiox]->PDIR & GPIO_PDIR_PDI(1 << pinx);
 	
 	return pin;
 }
@@ -125,24 +143,29 @@ uint8_t drv_gpio_ReadPin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
 *
 * Description: 写引脚电平
 *             
-* Arguments  : 1> PORTx: GPIO端口指针, PORTA~PORTI
-*              2> GPIO_Pin: 引脚编号
-*              3> NewState: 枚举变量,SET 或者 RESET
+* Arguments  : 1> GPIO_Pin: 引脚编号
+*              2> NewState: 枚举变量,SET 或者 RESET
 *
 * Reutrn     : Nono.
 *
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, GPIO_PinState PinState)
+void drv_gpio_WritePin(uint8_t GPIO_Pin, GPIO_PinState PinState)
 {
+	uint8_t gpiox = 0, pinx = 0;
+	uint8_t pintemp = GPIO_Pin;
+	
+	gpiox = (uint8_t)(pintemp>>5);		/*  计算出GPIO端口  */
+	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
+	
 	if(PinState == GPIO_PIN_RESET)  /*  如果设置低电平  */
 	{
-		PORTx->PCOR |= 1 << GPIO_Pin;
+		GPIOX[gpiox]->PCOR |= 1 << pinx;
 	}
 	else
 	{
-		PORTx->PSOR |= 1 << GPIO_Pin;
+		GPIOX[gpiox]->PSOR |= 1 << pinx;
 	}
 }
 
@@ -152,17 +175,22 @@ void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, GPIO_PinState PinStat
 *
 * Description: 翻转引脚电平
 *             
-* Arguments  : 1> PORTx: GPIO端口指针, PORTA~PORTI
-*              2> GPIO_Pin: 引脚编号
+* Arguments  : 1> GPIO_Pin: 引脚编号
 *
 * Reutrn     : None.
 *
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void drv_gpio_TogglePin(GPIO_Type *PORTx, uint8_t GPIO_Pin)
+void drv_gpio_TogglePin(uint8_t GPIO_Pin)
 {
-	PORTx->PTOR |= 1 << GPIO_Pin;		/*  PORTx->PTOR寄存器,跳变寄存器  */
+	uint8_t gpiox = 0, pinx = 0;
+	uint8_t pintemp = GPIO_Pin;
+	
+	gpiox = (uint8_t)(pintemp>>5);		/*  计算出GPIO端口  */
+	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
+	
+	GPIOX[gpiox]->PTOR |= 1 << pinx;		/*  GPIOX[gpiox]->PTOR寄存器,跳变寄存器  */
 }
 
 
@@ -214,6 +242,49 @@ void drv_gpio_PinAFConfig(uint8_t GPIO_PinSource, uint16_t GPIO_AF)
 	{
 		SIM->PINSEL1 &= ~(clrbit << bit);		/*  先清除设置  */
 		SIM->PINSEL1 |= GPIO_PinSource << bit;
+	}
+}
+
+
+/*
+*********************************************************************************************************
+*                                    drv_gpio_PullCmd      
+*
+* Description: 使能内部上拉电阻
+*             
+* Arguments  : 1> GPIO_Pin: 要使能的引脚
+*              2> NewState: 使能或者禁用
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+void drv_gpio_PullCmd(uint8_t GPIO_Pin, FunctionalState NewState)
+{
+	uint8_t gpiox = 0, pinx = 0;
+	uint8_t pintemp = GPIO_Pin;
+	
+	gpiox = (uint8_t)(pintemp>>5);		/*  计算出GPIO端口  */
+	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
+	
+	if(NewState != DISABLE)
+	{
+		if(GPIOX[gpiox] == GPIOA)
+			PORT->PUE0 |= (uint32_t)1<<pinx;
+		else if(GPIOX[gpiox] == GPIOB)
+			PORT->PUE1 |= (uint32_t)1<<pinx;
+		else if(GPIOX[gpiox] == GPIOC)
+			PORT->PUE2 |= (uint32_t)1<<pinx;
+	}
+	else
+	{
+		if(GPIOX[gpiox] == GPIOA)
+			PORT->PUE0 &= ~((uint32_t)1<<GPIO_Pin);
+		else if(GPIOX[gpiox] == GPIOB)
+			PORT->PUE1 &= ~((uint32_t)1<<GPIO_Pin);
+		else if(GPIOX[gpiox] == GPIOC)
+			PORT->PUE2 &= ~((uint32_t)1<<GPIO_Pin);
 	}
 }
 

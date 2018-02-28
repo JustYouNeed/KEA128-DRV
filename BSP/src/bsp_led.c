@@ -44,13 +44,18 @@ void bsp_led_Config(void)
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_HDrv = DISABLE;
-	drv_gpio_Init(LED1_PORT, &GPIO_InitStruct);
+	drv_gpio_Init(&GPIO_InitStruct);
 	
 	GPIO_InitStruct.GPIO_Pin = LED2_PIN;
-	drv_gpio_Init(LED2_PORT, &GPIO_InitStruct);
+	drv_gpio_Init(&GPIO_InitStruct);
 	
 	GPIO_InitStruct.GPIO_Pin = LED3_PIN;
-	drv_gpio_Init(LED3_PORT, &GPIO_InitStruct);
+	drv_gpio_Init(&GPIO_InitStruct);
+	
+	GPIO_InitStruct.GPIO_Pin = LED4_PIN;
+	drv_gpio_Init(&GPIO_InitStruct);
+	
+	bsp_led_OFF(LED_ALL);
 }
 
 
@@ -73,13 +78,13 @@ void bsp_led_ON(uint8_t LEDx)
 	{
 		case LED_ALL: 
 		{
-			drv_gpio_WritePin(LED1_PORT, LED1_PIN, LED_ON);
-			drv_gpio_WritePin(LED2_PORT, LED2_PIN, LED_ON);
-			drv_gpio_WritePin(LED3_PORT, LED3_PIN, LED_ON);
+			drv_gpio_WritePin(LED1_PIN, LED_ON);
+			drv_gpio_WritePin(LED2_PIN, LED_ON);
+			drv_gpio_WritePin(LED3_PIN, LED_ON);
 		}break;
-		case LED1: drv_gpio_WritePin(LED1_PORT, LED1_PIN, LED_ON);break;
-		case LED2: drv_gpio_WritePin(LED2_PORT, LED2_PIN, LED_ON);break;
-		case LED3: drv_gpio_WritePin(LED3_PORT, LED3_PIN, LED_ON);break;
+		case LED1: drv_gpio_WritePin(LED1_PIN, LED_ON);break;
+		case LED2: drv_gpio_WritePin(LED2_PIN, LED_ON);break;
+		case LED3: drv_gpio_WritePin(LED3_PIN, LED_ON);break;
 		default: break;
 	}
 }
@@ -103,13 +108,13 @@ void bsp_led_OFF(uint8_t LEDx)
 	{
 		case LED_ALL: 
 		{
-			drv_gpio_WritePin(LED1_PORT, LED1_PIN, LED_OFF);
-			drv_gpio_WritePin(LED2_PORT, LED2_PIN, LED_OFF);
-			drv_gpio_WritePin(LED3_PORT, LED3_PIN, LED_OFF);
+			drv_gpio_WritePin(LED1_PIN, LED_OFF);
+			drv_gpio_WritePin(LED2_PIN, LED_OFF);
+			drv_gpio_WritePin(LED3_PIN, LED_OFF);
 		}break;
-		case LED1: drv_gpio_WritePin(LED1_PORT, LED1_PIN, LED_OFF);break;
-		case LED2: drv_gpio_WritePin(LED2_PORT, LED2_PIN, LED_OFF);break;
-		case LED3: drv_gpio_WritePin(LED3_PORT, LED3_PIN, LED_OFF);break;
+		case LED1: drv_gpio_WritePin(LED1_PIN, LED_OFF);break;
+		case LED2: drv_gpio_WritePin(LED2_PIN, LED_OFF);break;
+		case LED3: drv_gpio_WritePin(LED3_PIN, LED_OFF);break;
 		default: break;
 	}
 }
@@ -134,13 +139,13 @@ void bsp_led_Toggle(uint8_t LEDx)
 	{
 		case LED_ALL: 
 		{
-			drv_gpio_TogglePin(LED1_PORT, LED1_PIN);
-			drv_gpio_TogglePin(LED2_PORT, LED2_PIN);
-			drv_gpio_TogglePin(LED3_PORT, LED3_PIN);
+			drv_gpio_TogglePin(LED1_PIN);
+			drv_gpio_TogglePin(LED2_PIN);
+			drv_gpio_TogglePin(LED3_PIN);
 		}break;
-		case LED1: drv_gpio_TogglePin(LED1_PORT, LED1_PIN);break;
-		case LED2: drv_gpio_TogglePin(LED2_PORT, LED2_PIN);break;
-		case LED3: drv_gpio_TogglePin(LED3_PORT, LED3_PIN);break;
+		case LED1: drv_gpio_TogglePin(LED1_PIN);break;
+		case LED2: drv_gpio_TogglePin(LED2_PIN);break;
+		case LED3: drv_gpio_TogglePin(LED3_PIN);break;
 		default: break;
 	}
 }

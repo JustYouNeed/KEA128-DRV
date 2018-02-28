@@ -26,9 +26,9 @@ static Key_Fifo_Str		 bsp_key_fifo;   /* 按键FIFO结构体 */
 static Key_Str		     bsp_key[BSP_KEY_COUNT];  /* 单个按键控制结构体 */
 
 
-static uint8_t IsKeyUpPress(void) { return drv_gpio_ReadPin(KEY_UP_PORT, KEY_UP_PIN);}
-static uint8_t IsKeyOkPress(void) { return drv_gpio_ReadPin(KEY_OK_PORT, KEY_OK_PIN);}
-static uint8_t IsKeyDownPress(void) { return drv_gpio_ReadPin(KEY_DOWN_PORT, KEY_DOWN_PIN);}
+static uint8_t IsKeyUpPress(void) { return drv_gpio_ReadPin(KEY_UP_PIN);}
+static uint8_t IsKeyOkPress(void) { return drv_gpio_ReadPin(KEY_OK_PIN);}
+static uint8_t IsKeyDownPress(void) { return drv_gpio_ReadPin(KEY_DOWN_PIN);}
 
 /*
 *********************************************************************************************************
@@ -52,13 +52,13 @@ static void bsp_key_GPIOInit(void)
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStructure.GPIO_HDrv = DISABLE;
 	
-	drv_gpio_Init(PORTA, &GPIO_InitStructure);
+	drv_gpio_Init(&GPIO_InitStructure);
 	
 	GPIO_InitStructure.GPIO_Pin = KEY_OK_PIN;
-	drv_gpio_Init(PORTA, &GPIO_InitStructure);
+	drv_gpio_Init(&GPIO_InitStructure);
 	
 	GPIO_InitStructure.GPIO_Pin = KEY_DOWN_PIN;
-	drv_gpio_Init(PORTA, &GPIO_InitStructure);
+	drv_gpio_Init(&GPIO_InitStructure);
 }
 
 

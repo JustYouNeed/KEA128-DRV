@@ -435,6 +435,16 @@
               <FilePath>..\DRV\src\drv_ftm.c</FilePath>
             </File>
             <File>
+              <FileName>drv_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DRV\src\drv_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_wdog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DRV\src\drv_wdog.c</FilePath>
+            </File>
+            <File>
               <FileName>drv_acmp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DRV\src\drv_acmp.c</FilePath>
@@ -465,20 +475,20 @@
               <FilePath>..\DRV\src\drv_rtc.c</FilePath>
             </File>
             <File>
-              <FileName>drv_spi.c</FileName>
+              <FileName>drv_kbi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\DRV\src\drv_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>drv_wdog.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DRV\src\drv_wdog.c</FilePath>
+              <FilePath>..\DRV\src\drv_kbi.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>BSP</GroupName>
           <Files>
+            <File>
+              <FileName>bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp.c</FilePath>
+            </File>
             <File>
               <FileName>bsp_led.c</FileName>
               <FileType>1</FileType>
@@ -499,10 +509,17 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\src\bsp_key.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp_oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\src\bsp_flash.c</FilePath>
+            </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>APP</GroupName>
         </Group>
       </Groups>
     </Target>

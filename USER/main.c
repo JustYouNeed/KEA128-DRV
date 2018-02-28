@@ -1,16 +1,35 @@
-# include "drv_gpio.h"
-# include "bsp_uart.h"
-# include "bsp_timer.h"
+# include "drv.h"
+# include "bsp.h"
+
+void test_Led1Test(void)
+{
+	bsp_led_Toggle(1);
+}
+
+void test_Led2Test(void)
+{
+	bsp_led_Toggle(2);
+}
 
 int main(void)
-{	
-	bsp_tim_SoftConfig();
-	bsp_uart_Init();
+{		
+	uint16_t cnt = 0;
+	
+	bsp_Config();
+	
+	bsp_tim_CreateHardTimer(0, 200, test_Led1Test);
+	bsp_tim_CreateHardTimer(1, 400, test_Led2Test);
 	
 	while(1)
 	{
-		bsp_tim_DelayMs(100);
-		bsp_uart_Printf("Hello World\r\n");
+		bsp_tim_DelayMs(400);		
+		cnt ++;
+		
+		if(cnt > 20)
+		{
+			bsp_tim_DeleteHardTimer(0);
+			bsp_tim_DeleteHardTimer(1);
+		}
 	}
 }
 

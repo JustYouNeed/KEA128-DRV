@@ -2,7 +2,7 @@
   *******************************************************************************************************
   * File Name: drv_gpio.h
   * Author: Vector
-  * Version: V1.0.0
+  * Version: V2.3.1
   * Date: 2018-2-1
   * Brief: 该文件对与GPIO相关的外设进行了声明,同时声明了操作GPIO的函数、结构体、枚举变量等
   *******************************************************************************************************
@@ -18,6 +18,12 @@
 	*		3.Data: 2018-2-17
 	*			Author:	Vector
 	*			Mod:	新增引脚状态枚举变量,修复设置引脚状态函数错误
+	*
+	*		4.Date:2018-2-28
+	*			Author: Vector
+	*			Mod: 1.添加新函数drv_gpio_PullCmd的声明,用于设置引脚的上拉电阻
+	*					 2.删除GPIOBPin_TypeDef.GPIOCPin_TypeDef枚举变量,更改引脚表示方式,整个到枚举变量GPIOPin_TypeDef中
+	*          3.更改函数调用逻辑,不需要手动输入端口号,改由函数求出
   *
   *******************************************************************************************************
   */
@@ -181,12 +187,9 @@ typedef enum
 	GPIO_Pin_D5,
 	GPIO_Pin_D6,
 	GPIO_Pin_D7,
-}GPIOAPin_TypeDef;
-
-/*  GPIOB寄存器管的引脚枚举变量  */
-typedef enum
-{
-	GPIO_Pin_E0 = 0x0,
+	
+	
+	GPIO_Pin_E0,
 	GPIO_Pin_E1,
 	GPIO_Pin_E2,
 	GPIO_Pin_E3,
@@ -221,12 +224,9 @@ typedef enum
 	GPIO_Pin_H5,
 	GPIO_Pin_H6,
 	GPIO_Pin_H7,
-}GPIOBPin_TypeDef;
-
-/*  GPIOC寄存器管的引脚枚举变量  */
-typedef enum
-{
-	GPIO_Pin_I0 = 0x0,
+	
+	
+	GPIO_Pin_I0,
 	GPIO_Pin_I1,
 	GPIO_Pin_I2,
 	GPIO_Pin_I3,
@@ -234,22 +234,23 @@ typedef enum
 	GPIO_Pin_I5,
 	GPIO_Pin_I6,
 	GPIO_Pin_I7,
-}GPIOCPin_TypeDef;
+}GPIOPin_TypeDef;
+
 
 /*  GPIO引脚状态枚举变量  */
 typedef enum
 {
   GPIO_PIN_RESET = 0,
-  GPIO_PIN_SET
+  GPIO_PIN_SET = 1,
 }GPIO_PinState;
 
 /*  供外部使用的GPIO引脚操作函数  */
-void drv_gpio_Init(GPIO_Type *PORTx, GPIO_InitTypeDef *GPIO_InitStruct);
-uint8_t drv_gpio_ReadPin(GPIO_Type *PORTx, uint8_t GPIO_Pin);
-void drv_gpio_WritePin(GPIO_Type *PORTx, uint8_t GPIO_Pin, GPIO_PinState PinState);
-void drv_gpio_TogglePin(GPIO_Type *PORTx, uint8_t GPIO_Pin);
+void drv_gpio_Init(GPIO_InitTypeDef *GPIO_InitStruct);
+uint8_t drv_gpio_ReadPin(uint8_t GPIO_Pin);
+void drv_gpio_WritePin(uint8_t GPIO_Pin, GPIO_PinState PinState);
+void drv_gpio_TogglePin(uint8_t GPIO_Pin);
 void drv_gpio_PinAFConfig(uint8_t GPIO_PinSource, uint16_t GPIO_AF);
-
+void drv_gpio_PullCmd(uint8_t GPIO_Pin, FunctionalState NewState);
 # endif
 
 /********************************************  END OF FILE  *******************************************/

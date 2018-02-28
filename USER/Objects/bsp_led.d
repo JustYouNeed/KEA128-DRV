@@ -9,6 +9,7 @@
 .\objects\bsp_led.o: D:\KeilPack\Keil\Kinetis_KEAxx_DFP\1.3.0\Device\Include\system_SKEAZ1284.h
 .\objects\bsp_led.o: ..\USER\typedefs.h
 .\objects\bsp_led.o: ..\DRV\inc\drv.h
+.\objects\bsp_led.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\bsp_led.o: ..\DRV\inc\drv_gpio.h
 .\objects\bsp_led.o: ..\USER\derivative.h
 .\objects\bsp_led.o: D:\KeilPack\Keil\Kinetis_KEAxx_DFP\1.3.0\Device\Include\SKEAZ1284.h
@@ -32,4 +33,8 @@
 .\objects\bsp_led.o: ..\DRV\inc\drv_pwt.h
 .\objects\bsp_led.o: ..\DRV\inc\drv_rtc.h
 .\objects\bsp_led.o: ..\DRV\inc\drv_spi.h
+.\objects\bsp_led.o: ..\USER\derivative.h
+.\objects\bsp_led.o: D:\KeilPack\Keil\Kinetis_KEAxx_DFP\1.3.0\Device\Include\SKEAZ1284.h
 .\objects\bsp_led.o: ..\DRV\inc\drv_wdog.h
+.\objects\bsp_led.o: ..\USER\derivative.h
+.\objects\bsp_led.o: D:\KeilPack\Keil\Kinetis_KEAxx_DFP\1.3.0\Device\Include\SKEAZ1284.h

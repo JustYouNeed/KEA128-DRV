@@ -2,14 +2,22 @@
   *******************************************************************************************************
   * File Name: bsp_timer.h
   * Author: Vector
-  * Version: V1.0.0
+  * Version: V1.1.1
   * Date: 2018-2-11
   * Brief: 本文件声明了有关软件定时器的一些变量
   *******************************************************************************************************
   * History
-	*		1.Data: 2018-2-11
+	*		1.Date: 2018-2-11
 	* 		Author: Vector
   *			Mod: 建立文件
+	*			
+	*		2.Date: 2018-2-27
+	*			Author: Vector
+	*			Mod: 1.修改函数名bsp_tim_CreateSoftTimer为bsp_tim_CreateSoftTimer
+	*					 2.修改函数名bsp_tim_DeleteTimer为bsp_tim_DeleteSoftTimer
+	*					 3.新增函数bsp_tim_CreateHardTimer声明,创建硬件定时器函数,硬件定时器采用PIT定时器
+	*				   4.新增函数bsp_tim_DeleteHardTimer声明,删除硬件定时器
+	*          4.新增结构体HardTimer_Str,硬件定时器管理结构体
   *
   *******************************************************************************************************
   */	
@@ -35,6 +43,12 @@ typedef struct
 	
 }SoftTimer_Str;
 
+typedef struct
+{
+	uint8_t ucUsed;							/*  是否已经使用  */
+	_cbTimerCallBack _cbTimer;	/*  回调函数  */
+}HardTimer_Str;
+
 /*  软件定时器模式枚举变量  */
 typedef enum
 {
@@ -43,8 +57,10 @@ typedef enum
 }TIMER_MODE_ENUM;
 
 void bsp_tim_SoftConfig(void);  /* 初始化软件定时器 */
-int8_t bsp_tim_CreateTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer, TIMER_MODE_ENUM eMode);
-int8_t bsp_tim_DeleteTimer(uint8_t ucTimerId);
+int8_t bsp_tim_CreateSoftTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer, TIMER_MODE_ENUM eMode);
+int8_t bsp_tim_CreateHardTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer);
+int8_t bsp_tim_DeleteSoftTimer(uint8_t ucTimerId);
+int8_t bsp_tim_DeleteHardTimer(uint8_t ucTimerId);
 _cbTimerCallBack bsp_tim_SetTimerCB(uint8_t TimerId, _cbTimerCallBack  _cbTimer);
 int8_t bsp_tim_TimerCheck(uint8_t ucTimerId);
 int32_t bsp_tim_GetRunTime(void);

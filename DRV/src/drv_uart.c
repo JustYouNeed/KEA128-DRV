@@ -56,12 +56,13 @@ uint32_t drv_uart_Init(UART_Type *UARTx, UART_InitTypeDef *UART_InitStruct)
 	
 	//UART波特率 = UART模块时钟/(16 X (SBR[12:0]))
 	uart_clk = SystemBusClock;
-	sbr = (uint16_t)(((uart_clk >> 4) + (UART_InitStruct->UART_BaudRate >> 1)) / UART_InitStruct->UART_BaudRate);
+	sbr = (uint16_t)(((uart_clk / 16) + (UART_InitStruct->UART_BaudRate / 2)) / UART_InitStruct->UART_BaudRate);
+
 	if(sbr > 0x1fff) sbr = 0x1fff;
 	
 	UARTx->BDH &= ~UART_BDH_SBR_MASK;				/*  清空波特率寄存器  */
 	UARTx->BDH |= UART_BDH_SBR(sbr>>8);     /*  先写入SBR高位  */
-  UARTx->BDL  = UART_BDL_SBR((uint8_t)sbr);  /*  写入低位  */
+  UARTx->BDL  = UART_BDL_SBR(sbr);  /*  写入低位  */
 	
 	UARTx->C2 |= UART_InitStruct->UART_Mode;		/*  设置串口模式  */
 	
@@ -128,6 +129,10 @@ void drv_uart_SelectChannle(UART_Type *UARTx, uint8_t Channel)
 	if(UART0 == UARTx)
 	{
 		SIM->PINSEL |= Channel << 7;
+		if(Channel == 1) 
+		{
+			PORT->PUE0 |= 1 << 2 | 1 << 3;
+		}
 	}
 	else if(UART1 == UARTx)
 	{

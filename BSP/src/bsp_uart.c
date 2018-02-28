@@ -10,7 +10,7 @@
   * History
 	*		1.Author: Vector
 	*			Data: 2018-2-11
-  *			Mod: 建立本文件
+  *			Mod: 建立本文件,发现存在BUG,暂未解决
   *
   *******************************************************************************************************
   */	
@@ -21,12 +21,13 @@
   *******************************************************************************************************
 */
 # include "bsp_uart.h"
+# include "bsp_led.h"
 # include <stdarg.h>
 # include "stdio.h"
 
 
 /*  定义串口控制结构体以及接收、发送数据缓存区  */
-static Uart_Str uart_info;
+Uart_Str uart_info;
 static uint8_t UartTxBuff[UART_TX_BUFF_SIZE];
 static uint8_t UartRxBuff[UART_TX_BUFF_SIZE];
 
@@ -64,7 +65,7 @@ void bsp_uart_ParaInit(void)
 
 /*
 *********************************************************************************************************
-*                                       bsp_uart_Init   
+*                                       bsp_uart_Config   
 *
 * Description: 初始化所有定义使用的串口
 *             
@@ -75,14 +76,14 @@ void bsp_uart_ParaInit(void)
 * Note(s)    : 串口波特率默认使用9600,如果需要更改,请在bsp_uart.h文件中更改宏: UART_BAUD
 *********************************************************************************************************
 */
-void bsp_uart_Init(void)
+void bsp_uart_Config(void)
 {
 	UART_InitTypeDef UART_InitStruct;
 	
 	bsp_uart_ParaInit();		/*  结构体初始化  */
 	
 	UART_InitStruct.UART_BaudRate = UART_BAUD;		/*  波特率9600  */
-	UART_InitStruct.UART_Channel = UART_Channel_0;	/*  通道0  */
+	UART_InitStruct.UART_Channel = UART_Channel_1;	/*  通道1  */
 	UART_InitStruct.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;	/*  接收与发送,全双工模式  */
 	UART_InitStruct.UART_Parity = UART_Parity_No;	/*  无检验  */
 	UART_InitStruct.UART_StopBits = UART_StopBits_1;	/*  一位停止位  */
@@ -90,7 +91,12 @@ void bsp_uart_Init(void)
 	drv_uart_Init(UART0, &UART_InitStruct);
 	
 	uart_info.uart->C2 |= 1 << 5;		/*  开启接收中断  */
+//	uart_info.uart->C2 |= 1 << 4;
+//	uart_info.uart->C2 |= 1 << 6;
+//	uart_info.uart->C2 |= 1 << 7;
 	
+	NVIC_EnableIRQ(UART0_IRQn);
+		
 	drv_uart_Cmd(UART0, ENABLE);		/*  使能串口  */
 }
 
@@ -218,18 +224,22 @@ void bsp_uart_SendDataToBuff(COM_PORT_ENUM Port, uint8_t *buff, uint16_t length)
 		{
 			__IO uint16_t Count;
 			
+//			DISABLE_INT();
 			Count = pUart->TxCount;
+//			ENABLE_INT();
 			
 			if(Count < pUart->TxBuffSize) break;
 		}
 		
 		pUart->pTxBuff[pUart->TxWrite] = buff[i];		/*  拷贝数据  */
 		
+	//	DISABLE_INT();
 		if(++ pUart->TxWrite >= pUart->TxBuffSize)	/*  环形队列  */
 		{
 			pUart->TxWrite = 0;
 		}
 		pUart->TxCount ++;		/*  需要发送的数据计数器  */
+//		ENABLE_INT();
 	}
 	pUart->uart->C2 |= 1 << 7; /*  打开TXE中断  */
 }
@@ -287,23 +297,35 @@ uint8_t bsp_uart_GetChar(COM_PORT_ENUM Port, uint8_t *byte)
 void bsp_uart_IRQHandler(Uart_Str *pUart)
 {
 	uint8_t RecvData = 0;
+	uint8_t reg = 0x0;
 	
-	if((pUart->uart->S1 & 0x20) != RESET)  /*  接收数据寄存器满  */
+	
+//	if(pUart->uart->S1 & UART_S1_RDRF_MASK)  /*  接收数据寄存器满  */
+//	{
+////		reg = (uint8_t)pUart->uart->S1;
+////		pUart->uart->S2 |= 1 << 6;
+//		RecvData = pUart->uart->D;		/*  读取数据并送入接收缓存区  */
+//		bsp_uart_Put(pUart, RecvData);
+//	}
+	
+	if(pUart->uart->S1 & UART_S1_OR_MASK)
 	{
-		RecvData = pUart->uart->D;		/*  读取数据并送入接收缓存区  */
-		bsp_uart_Put(pUart, RecvData);
+		reg = (uint8_t)pUart->uart->S1;
+		RecvData = pUart->uart->D;
 	}
-	
-	if((pUart->uart->S1 & 0x80) != RESET)	/*  发送缓存区为空,说明可以发送数据了  */
+	reg = (uint8_t)pUart->uart->S1;
+	if(pUart->uart->S1 & UART_S1_TDRE_MASK)	/*  发送缓存区为空,说明可以发送数据了  */
 	{
+		
 		if(pUart->TxCount == 0)  /*  没有数据需要发送  */
 		{
 			pUart->uart->C2 &= ~(1 << 7); /*  关闭TXE中断  */
-			pUart->uart->C2 |= 1 << 6;    /*  打开发送完成中断  */
+//			pUart->uart->C2 |= 1 << 6;    /*  打开发送完成中断  */
+			
 		}
 		else
 		{
-			pUart->uart->D = pUart->pTxBuff[pUart->TxRead]; /*  将数据写入发送缓存区  */ 
+			pUart->uart->D = (uint8_t)pUart->pTxBuff[pUart->TxRead]; /*  将数据写入发送缓存区  */ 
 			if(++ pUart->TxRead >= pUart->TxBuffSize)  /*  环形队列  */
 			{
 				pUart->TxRead = 0;
@@ -311,24 +333,27 @@ void bsp_uart_IRQHandler(Uart_Str *pUart)
 			pUart->TxCount --;		/*  需要发送的数据递减  */
 		}
 	}
-	else if((pUart->uart->S1 & 0x40) != RESET)  /*  发送完成中断  */
-	{
-		if(pUart->TxCount == 0)  /*  没有数据需要发送  */
-		{
-			pUart->uart->C2 &= ~(1 << 6);  /*  关闭发送完成中断  */
-			if(pUart->_cbSendOver)		/*  如果设置了发送完成回调函数  */
-				pUart->_cbSendOver(0);
-		}
-		else			/*  还有数据需要发送  */
-		{
-			pUart->uart->D = pUart->pTxBuff[pUart->TxRead]; /*  将数据写入发送缓存区  */ 
-			if(++ pUart->TxRead >= pUart->TxBuffSize)  /*  环形队列  */
-			{
-				pUart->TxRead = 0;
-			}
-			pUart->TxCount --;		/*  需要发送的数据递减  */
-		}
-	}
+//	else if((pUart->uart->S1 & 0x40) != RESET)  /*  发送完成中断  */
+//	{
+//		
+//		if(pUart->TxCount == 0)  /*  没有数据需要发送  */
+//		{
+//			pUart->uart->C2 &= ~(1 << 6);  /*  关闭发送完成中断  */
+//			pUart->uart->C2 &= ~(1 << 3);
+//			pUart->uart->C2 |= (1 << 3);
+//			if(pUart->_cbSendOver)		/*  如果设置了发送完成回调函数  */
+//				pUart->_cbSendOver(0);
+//		}
+//		else			/*  还有数据需要发送  */
+//		{
+//			pUart->uart->D = pUart->pTxBuff[pUart->TxRead]; /*  将数据写入发送缓存区  */ 
+//			if(++ pUart->TxRead >= pUart->TxBuffSize)  /*  环形队列  */
+//			{
+//				pUart->TxRead = 0;
+//			}
+//			pUart->TxCount --;		/*  需要发送的数据递减  */
+//		}
+//	}
 }
 
 
@@ -376,10 +401,11 @@ uint8_t bsp_uart_Printf(const char *format, ...)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void UART0_IRQHandler(void)
-{
-	bsp_uart_IRQHandler(&uart_info);
-}
+//void UART0_IRQHandler(void)
+//{
+//	(void)UART0_S1;
+//	bsp_uart_IRQHandler(&uart_info);
+//}
 
 
 /*  加入以下代码,支持printf, 而不需要选择use MicroLIB  */

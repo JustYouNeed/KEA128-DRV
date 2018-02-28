@@ -2,14 +2,19 @@
   *******************************************************************************************************
   * File Name: drv_pit.c
   * Author: Vector
-  * Version: V1.0.0
+  * Version: V1.0.1
   * Date: 2018-2-1
   * Brief: KEA128芯片PIT定时器底层驱动函数
   *******************************************************************************************************
   * History
-  *		1.Data: 2018-2-1
+  *		1.Date: 2018-2-1
   *     Author: Vector
   *     Mod: 建立文件,添加基本函数
+	*	
+	*		2.Date: 2018-2-27
+	*			Author: Vector
+	*			Mod: 1.修复定时器设置失败BUG
+	*          2.修复停止定时器失败BUG
   *
   *******************************************************************************************************
   */
@@ -42,19 +47,38 @@ static _cb_PIT_IRQHandler PIT_Handler[2];
 */
 void drv_pit_Init(PIT_InitTypeDef *PIT_InitStruct)
 {
-	SIM->SCGC |= SIM_SCGC_PIT_MASK;			/*  使能PIT时钟  */
-	PIT->MCR = 0;												/*  使能PIT定时器时钟,调试时可用  */
-	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].LDVAL = PIT_InitStruct->PIT_Period;	/*  设置溢出中断时间  */
+	uint32_t cnt = 0;
+	
+	drv_rcc_ClockCmd(RCC_PeriphClock_PIT, ENABLE);
+
+	PIT->MCR &= ~PIT_MCR_MDIS_MASK;
+	cnt = (SystemBusClock / 1000 ) * PIT_InitStruct->PIT_Period;
+	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].LDVAL = cnt;	/*  设置溢出中断时间  */
 	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TFLG |= PIT_TFLG_TIF_MASK;					/*  清除中断标志位  */
 	
 	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TCTRL &= ~ PIT_TCTRL_TEN_MASK;       	/*  禁止PITx定时器,用于清空计数器  */
 	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TCTRL &= ~PIT_TCTRL_TIE_MASK;         /*  先关闭中断  */
-	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TCTRL  = ( 0 | PIT_TCTRL_TEN_MASK );	/*  开启PITx定时器  */
+	PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TCTRL  |= PIT_TCTRL_TEN_MASK;	/*  开启PITx定时器  */
 	
-	if(PIT_InitStruct->PIT_IRQCmd == 1)		/*  如果开启了中断则配置相应位  */
+	if(PIT_InitStruct->PIT_IRQCmd == ENABLE)		/*  如果开启了中断则配置相应位  */
 	{
 		PIT->CHANNEL[PIT_InitStruct->PIT_Channel].TCTRL  |= PIT_TCTRL_TIE_MASK;		/*  开启中断  */
 		PIT_Handler[PIT_InitStruct->PIT_Channel] = PIT_InitStruct->PIT_Callback;	/*  配置中断函数  */
+		
+		/*  配置相关中断  */
+		switch(PIT_InitStruct->PIT_Channel)
+		{
+			case PIT_Channel_0: 
+			{
+				NVIC_EnableIRQ(PIT_CH0_IRQn);		/*  开启中断  */
+				NVIC_SetPriority(PIT_CH0_IRQn, PIT_InitStruct->PIT_IRQPriority);	/*  设置中断优先级  */
+			}break;
+			case PIT_Channel_1: 
+			{
+				NVIC_EnableIRQ(PIT_CH1_IRQn); /*  开启中断  */
+				NVIC_SetPriority(PIT_CH1_IRQn, PIT_InitStruct->PIT_IRQPriority); /*  设置中断优先级  */
+			}break;
+		}
 	}
 }
 
@@ -128,6 +152,11 @@ void drv_pit_Stop(uint8_t PITx)
 	
 	PIT->CHANNEL[PITx].TFLG |= PIT_TFLG_TIF_MASK;		/*  清除中断标志位  */
 	PIT->CHANNEL[PITx].TCTRL &= ~ PIT_TCTRL_TEN_MASK;		/*  禁止定时器  */
+	
+	if(PITx == 0)
+		NVIC_DisableIRQ(PIT_CH0_IRQn);
+	else if(PITx == 1)
+		NVIC_DisableIRQ(PIT_CH1_IRQn);
 }
 
 
@@ -146,12 +175,12 @@ void drv_pit_Stop(uint8_t PITx)
 */
 void PIT_CH0_IRQHandler(void)
 {
-	if(PIT->CHANNEL[0].TFLG & 0x01)		/*  发生了中断  */
+	if(PIT->CHANNEL[PIT_Channel_0].TFLG & 0x01)		/*  发生了中断  */
 	{
-		if(PIT_Handler[0])	/*  如果设置了中断回调函数  */
-			PIT_Handler[0]();			/*  调用中断回调函数  */
+		if(PIT_Handler[PIT_Channel_0])	/*  如果设置了中断回调函数  */
+			PIT_Handler[PIT_Channel_0]();			/*  调用中断回调函数  */
 	}
-	PIT->CHANNEL[0].TFLG |= PIT_TFLG_TIF_MASK; /*  清除中断标志位  */
+	PIT->CHANNEL[PIT_Channel_0].TFLG |= PIT_TFLG_TIF_MASK; /*  清除中断标志位  */
 }
 
 
@@ -170,12 +199,12 @@ void PIT_CH0_IRQHandler(void)
 */
 void PIT_CH1_IRQHandler(void)
 {
-	if(PIT->CHANNEL[1].TFLG & 0x01)		/*  发生了中断  */
+	if(PIT->CHANNEL[PIT_Channel_1].TFLG & 0x01)		/*  发生了中断  */
 	{
-		if(PIT_Handler[1])	/*  如果设置了中断回调函数  */
-			PIT_Handler[1]();			/*  调用中断回调函数  */
+		if(PIT_Handler[PIT_Channel_1])	/*  如果设置了中断回调函数  */
+			PIT_Handler[PIT_Channel_1]();			/*  调用中断回调函数  */
 	}
-	PIT->CHANNEL[1].TFLG |= PIT_TFLG_TIF_MASK; /*  清除中断标志位  */
+	PIT->CHANNEL[PIT_Channel_1].TFLG |= PIT_TFLG_TIF_MASK; /*  清除中断标志位  */
 }
 
 

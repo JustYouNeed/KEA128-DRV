@@ -21,8 +21,8 @@
 
 
 # define UART_BAUD		9600
-# define UART_TX_BUFF_SIZE	512
-# define UART_RX_BUFF_SIZE	512
+# define UART_TX_BUFF_SIZE	256
+# define UART_RX_BUFF_SIZE	256
 
 /*  串口编号枚举变量  */
 typedef enum
@@ -55,12 +55,12 @@ typedef struct
 	void (*_cbRecvData)(uint8_t byte);	/*  接收到数据时的回调指针  */
 }Uart_Str;
 
-void bsp_uart_Init(void);
+void bsp_uart_Config(void);
 void bsp_uart_Put(Uart_Str *pUart,uint8_t byte);
 void bsp_uart_ClearTxBuff(COM_PORT_ENUM Port);
 void bsp_uart_ClearRxBuff(COM_PORT_ENUM Port);
 void bsp_uart_SendDataToBuff(COM_PORT_ENUM Port, uint8_t *buff, uint16_t length);
-uint8_t bsp_uart_GetBbsp_uart_GetCharyte(COM_PORT_ENUM Port, uint8_t *byte);
+uint8_t bsp_uart_GetChar(COM_PORT_ENUM Port, uint8_t *byte);
 uint8_t bsp_uart_Printf(const char *format, ...);
 
 void bsp_uart_IRQHandler(Uart_Str *pUart);

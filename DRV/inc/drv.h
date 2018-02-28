@@ -1,9 +1,10 @@
 # ifndef __DRV_H
 # define __DRV_H
 
+# include "stdio.h"
 
-# define DISABLE_INT()		asm(" CPSID i")
-# define ENABLE_INT()			asm(" CPSIE i")
+# define DISABLE_INT()		__disable_irq();
+# define ENABLE_INT()			__enable_irq()
 
 
 typedef enum {RESET = 0, SET = !RESET} FlagStatus, ITStatus;

@@ -71,9 +71,9 @@
     #define CPU_INT_CLK_HZ                  32768u   /* Value of the internal oscillator clock frequency in Hz  */
     #define DEFAULT_SYSTEM_CLOCK            20971520u /* Default System clock value */
 #elif (CLOCK_SETUP == 1)
-    #define CPU_XTAL_CLK_HZ                 8000000u /* Value of the external crystal or oscillator clock frequency in Hz */
+    #define CPU_XTAL_CLK_HZ                 16000000u /* Value of the external crystal or oscillator clock frequency in Hz */
     #define CPU_INT_CLK_HZ                  32768u   /* Value of the internal oscillator clock frequency in Hz  */
-    #define DEFAULT_SYSTEM_CLOCK            40000000u /* Default System clock value */
+    #define DEFAULT_SYSTEM_CLOCK            80000000u /* Default System clock value */
 #elif (CLOCK_SETUP == 2)
     #define CPU_XTAL_CLK_HZ                 8000000u /* Value of the external crystal or oscillator clock frequency in Hz */
     #define CPU_INT_CLK_HZ                  32768u   /* Value of the internal oscillator clock frequency in Hz  */
@@ -112,6 +112,7 @@ void SystemInit (void) {
              WDOG_CS1_STOP_MASK;
 
 #endif /* (DISABLE_WDOG) */
+	
 #if (CLOCK_SETUP == 0)
   /* ICS->C2: BDIV|=1 */
   ICS->C2 |= ICS_C2_BDIV(0x01);         /* Update system prescalers */
@@ -137,15 +138,15 @@ void SystemInit (void) {
   while((ICS->S & 0x0CU) != 0x00U) {    /* Wait until output of the FLL is selected */
   }
 #elif (CLOCK_SETUP == 1)
-  /* SIM->CLKDIV: ??=0,??=0,OUTDIV1=0,??=0,??=0,??=0,OUTDIV2=1,??=0,??=0,??=0,OUTDIV3=1,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
-  SIM->CLKDIV = SIM_CLKDIV_OUTDIV1(0x00); /* Update system prescalers */
-  /* Switch to FEE Mode */
-  /* ICS->C2: BDIV=0,LP=0 */
-  ICS->C2 &= (uint8_t)~(uint8_t)((ICS_C2_BDIV(0x07) | ICS_C2_LP_MASK));
+	SIM->CLKDIV = (0 | SIM_CLKDIV_OUTDIV1(0x00) 					/*  将ICSOUTCLK作为系统时钟  */
+								| 1 << SIM_CLKDIV_OUTDIV2_SHIFT			/*  将时钟的1/2作为总线时钟  */
+								| 1 << SIM_CLKDIV_OUTDIV3_SHIFT);		/*  将系统时钟的1/2作为定时器时钟  */
+	
+	ICS->C2 = 0 | ICS_C2_BDIV(0x0);
   /* OSC->CR: OSCEN=1,??=0,OSCSTEN=0,OSCOS=1,??=0,RANGE=1,HGO=0,OSCINIT=0 */
-  OSC->CR = (OSC_CR_OSCEN_MASK | OSC_CR_OSCOS_MASK | OSC_CR_RANGE_MASK);
+  OSC->CR = (OSC_CR_OSCEN_MASK | OSC_CR_OSCOS_MASK | OSC_CR_RANGE_MASK | OSC_CR_HGO_MASK);
   /* ICS->C1: CLKS=0,RDIV=3,IREFS=0,IRCLKEN=1,IREFSTEN=0 */
-  ICS->C1 = (ICS_C1_CLKS(0x00) | ICS_C1_RDIV(0x03) | ICS_C1_IRCLKEN_MASK);
+  ICS->C1 = (0 | ICS_C1_CLKS(0x00) | ICS_C1_RDIV(0x03) | ICS_C1_IRCLKEN_MASK);
   while((ICS->S & ICS_S_IREFST_MASK) != 0x00U) { /* Check that the source of the FLL reference clock is the external reference clock. */
   }
   while((ICS->S & 0x0CU) != 0x00U) {    /* Wait until output of the FLL is selected */

@@ -2,7 +2,7 @@
   *******************************************************************************************************
   * File Name: bsp_timer.c
   * Author: Vector
-  * Version: V1.1.1
+  * Version: V1.2.2
   * Date: 2018-2-11
   * Brief: 本文件对滴答定时器进行了一定程度的封装,同时建立了软件定时器,每个定时器可有一个回调函数
   *******************************************************************************************************
@@ -13,7 +13,17 @@
 	*		
 	*		2.Author: Vector
 	*			Date:	2018-2-17
-	*			Mod:	1、修复定时器标志位问题	2、修复定时器创建失败问题
+	*			Mod:	1.修复定时器标志位问题	
+	*						2.修复定时器创建失败问题
+	*						
+	*		3.Author: Vector
+	*			Date: 2018-2-27
+	*			Mod: 1.修改函数名bsp_tim_CreateSoftTimer为bsp_tim_CreateSoftTimer
+	*					 2.修改函数名bsp_tim_DeleteTimer为bsp_tim_DeleteSoftTimer
+	*					 3.优化部分函数,防止出现数组越界的可能
+	*          4.新增函数bsp_tim_CreateHardTimer定义,创建硬件定时器函数,硬件定时器采用PIT定时器
+	*          5.新增函数bsp_tim_DeleteHardTimer定义,删除硬件定时器
+	*          6.新增HardTimer[]硬件定时器管理数组
 	*
   *******************************************************************************************************
   */	
@@ -31,7 +41,8 @@ static volatile uint8_t s_ucTimeOutFlag = 0;	/*  该文件私有变量,用于统计运行时间
 __IO int32_t g_iRunTime = 0;		/*  该文件私有变量,运行时间  */
 
 
-SoftTimer_Str SoftTimer[SOFT_TIMER_COUNT];/*  软件定时器组  */
+SoftTimer_Str SoftTimer[SOFT_TIMER_COUNT];	/*  软件定时器组  */
+HardTimer_Str HardTimer[2];									/*  由于采用PIT定时器,因此硬件定时器最多只能有两个  */
 
 /*
 *********************************************************************************************************
@@ -165,7 +176,7 @@ void bsp_tim_SoftConfig(void)
 
 /*
 *********************************************************************************************************
-*                             bsp_tim_CreateTimer             
+*                             bsp_tim_CreateSoftTimer             
 *
 * Description: 创建一个软件定时器
 *             
@@ -182,10 +193,10 @@ void bsp_tim_SoftConfig(void)
 *							 3.定时器回调函数执行时间应尽可能短,且不能用延时函数
 *********************************************************************************************************
 */
-int8_t bsp_tim_CreateTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer, TIMER_MODE_ENUM eMode)
+int8_t bsp_tim_CreateSoftTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer, TIMER_MODE_ENUM eMode)
 {
-	if(SoftTimer[ucTimerId].ucUsed == 1) return -1;		/*  已经使用了的定时器不能再次创建  */
-	if(ucTimerId > SOFT_TIMER_COUNT) return -2;				/*  超过定时器数量  */
+	if(ucTimerId > SOFT_TIMER_COUNT) return -1;				/*  超过定时器数量  */
+	if(SoftTimer[ucTimerId].ucUsed == 1) return -2;		/*  已经使用了的定时器不能再次创建  */
 	
 	SoftTimer[ucTimerId].v_uiCount = uiPeriod;		/*  设置定时周期  */
 	SoftTimer[ucTimerId].v_ucFlag = 0;		/*  清除定时标志位  */
@@ -199,7 +210,7 @@ int8_t bsp_tim_CreateTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBac
 
 /*
 *********************************************************************************************************
-*                                   bsp_tim_DeleteTimer       
+*                                   bsp_tim_DeleteSoftTimer       
 *
 * Description: 删除一个软件定时器
 *             
@@ -211,17 +222,81 @@ int8_t bsp_tim_CreateTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBac
 * Note(s)    : 未使用的定时器不能被删除
 *********************************************************************************************************
 */
-int8_t bsp_tim_DeleteTimer(uint8_t ucTimerId)
+int8_t bsp_tim_DeleteSoftTimer(uint8_t ucTimerId)
 {
-	if(SoftTimer[ucTimerId].ucUsed == 0)  return -1;
-	if(ucTimerId > SOFT_TIMER_COUNT) return -2;
-	
+	if(ucTimerId > SOFT_TIMER_COUNT) return -1;
+	if(SoftTimer[ucTimerId].ucUsed == 0)  return -2;	
 	
 	SoftTimer[ucTimerId].v_ucMode = 0;
 	SoftTimer[ucTimerId].v_uiPreLoad = 0;
 	SoftTimer[ucTimerId].v_uiCount = 0;
 		
 	return 0;
+}
+
+/*
+*********************************************************************************************************
+*                             bsp_tim_CreateHardTimer             
+*
+* Description: 创建一个硬件定时器
+*             
+* Arguments  : 1> ucTimerId: 硬件定时器ID 
+*              2> uiPeriod: 定时周期
+*              3> _cbTimer: 定时器回调函数
+*
+* Reutrn     : 1> 0: 成功
+*              2> 其他: 错误代码
+*
+* Note(s)    : 1.软件定时器个数有限制，当传入ID超过最大定时器数量时将会创建失败
+*              2.软件定时器不能覆盖已经使用的定时器，需要将原来的删除后才能创建
+*							 3.定时器回调函数执行时间应尽可能短,且不能用延时函数
+*********************************************************************************************************
+*/
+int8_t bsp_tim_CreateHardTimer(uint8_t ucTimerId, uint32_t uiPeriod, _cbTimerCallBack  _cbTimer)
+{
+	PIT_InitTypeDef PIT_InitStruct;
+	
+	if(ucTimerId > 2) return -1;		/*  最多只能有两个定时器  */
+	if(HardTimer[ucTimerId].ucUsed == 1)	return -2;	/*  该定时器已经被使用了  */
+	
+	PIT_InitStruct.PIT_Channel = ucTimerId;
+	PIT_InitStruct.PIT_IRQCmd = ENABLE;
+	PIT_InitStruct.PIT_IRQPriority = 0x03;
+	PIT_InitStruct.PIT_Period = uiPeriod;
+	PIT_InitStruct.PIT_Callback = _cbTimer;
+	drv_pit_Init(&PIT_InitStruct);
+	
+	HardTimer[ucTimerId].ucUsed = 1;
+	HardTimer[ucTimerId]._cbTimer = _cbTimer;
+	return 0;
+}
+
+
+/*
+*********************************************************************************************************
+*                                 bsp_tim_DeleteHardTimer         
+*
+* Description: 删除一个硬件定时器
+*             
+* Arguments  : 1> ucTimerId: 定时器ID
+*
+* Reutrn     : 1> 0: 成功
+*              2> -1: 无效定时器ID
+*              3> -2: 该定时器未使用
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+int8_t bsp_tim_DeleteHardTimer(uint8_t ucTimerId)
+{
+	if(ucTimerId > 2) return -1;		/*  无效定时器ID  */
+	if(HardTimer[ucTimerId].ucUsed == 0) return -2;	/*  该定时器未使用  */
+	
+	drv_pit_Stop(ucTimerId);
+	
+	/*  清零定时器  */
+	HardTimer[ucTimerId].ucUsed = 0;
+	HardTimer[ucTimerId]._cbTimer = 0;
 }
 
 /*
