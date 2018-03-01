@@ -297,6 +297,8 @@ int8_t bsp_tim_DeleteHardTimer(uint8_t ucTimerId)
 	/*  ÇåÁã¶¨Ê±Æ÷  */
 	HardTimer[ucTimerId].ucUsed = 0;
 	HardTimer[ucTimerId]._cbTimer = 0;
+	
+	return 0;
 }
 
 /*

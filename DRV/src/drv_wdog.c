@@ -37,8 +37,8 @@
 */
 void drv_wdog_StdInit(WDOG_InitTypeDef *WDOG_InitStruct)
 {
-	uint16_t cnt = 0;
-	uint8_t reg = 0;
+//	uint16_t cnt = 0;
+//	uint8_t reg = 0;
 	
 	DISABLE_INT();
 	
@@ -176,3 +176,4 @@ void drv_wdog_IRQCmd(FunctionalState NewState)
 
 
 /********************************************  END OF FILE  *******************************************/
+

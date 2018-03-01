@@ -13,6 +13,12 @@
   *
   *******************************************************************************************************
   */	
+	
+/*
+  *******************************************************************************************************
+  *                              INCLUDE FILES
+  *******************************************************************************************************
+*/
 # include "drv_ftm.h"
 
 static FTM_Type * const FTMX[] = FTM_BASES;
@@ -66,6 +72,19 @@ void drv_ftm_OCInit(FTM_Type *FTMx, FTM_OCInitTypeDef *FTM_OCInitStruct)
 	
 }
 
+/*
+*********************************************************************************************************
+*                           drv_ftm_PWMInit               
+*
+* Description: 根据所填的参数初始化PWM
+*             
+* Arguments  : 1> PWM_InitStruct: PWM初始化结构体
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
 void drv_ftm_PWMInit(PWM_InitTypeDef *PWM_InitStruct)
 {
 	uint8_t FTMx = 0;
@@ -123,6 +142,21 @@ void drv_ftm_PWMInit(PWM_InitTypeDef *PWM_InitStruct)
 	FTMX[FTMx]->CONTROLS[channel].CnV = cv;             //设置占空比
 	FTMX[FTMx]->CNT = 0; 
 }
+
+/*
+*********************************************************************************************************
+*                             drv_ftm_PWMSetDuty             
+*
+* Description: 设置PWM通道的占空比,
+*             
+* Arguments  : 1> PWM_Channel: PWM通道,其值在drv_ftm.h中定义
+*              2> duty: 占空比,范围0-1000,表示0-100%
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
 void drv_ftm_PWMSetDuty(uint16_t PWM_Channel, uint16_t duty)
 {
 	uint16_t temp = PWM_Channel;
@@ -133,4 +167,7 @@ void drv_ftm_PWMSetDuty(uint16_t PWM_Channel, uint16_t duty)
 	pluse = (duty *(period[ftmx] - 0 + 1)) / 1000;
 	FTMX[ftmx]->CONTROLS[channel].CnV = pluse;
 }
+
+
+/********************************************  END OF FILE  *******************************************/
 

@@ -43,6 +43,7 @@ static GPIO_Type * const GPIOX[] = GPIO_BASES;
 */
 void drv_gpio_Init(GPIO_InitTypeDef *GPIO_InitStruct)
 {
+	uint32_t reg = 0;
 	uint8_t gpiox = 0, pinx = 0;
 	uint8_t pintemp = GPIO_InitStruct->GPIO_Pin;
 	
@@ -50,12 +51,25 @@ void drv_gpio_Init(GPIO_InitTypeDef *GPIO_InitStruct)
 	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
 	
 	GPIOX[gpiox]->PIDR |= ((uint32_t)1 << pinx);	/*  先禁止输入  */
+	GPIOX[gpiox]->PDDR &= ~((uint32_t)1 << pinx);
 	
-	/*  配置端口数据方向寄存器,配置为相应的输入/输出模式  */
-	GPIOX[gpiox]->PDDR |= (GPIO_InitStruct->GPIO_Mode << pinx);
+	/*  根据初始化结构体的值设置为相应的输入/输出  */
+	if(GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IN)
+	{
+		reg = GPIOX[gpiox]->PIDR;
+		reg &= ~((uint32_t)1 << pinx);
+		GPIOX[gpiox]->PIDR = reg;
+	}
+	else if(GPIO_InitStruct->GPIO_Mode == GPIO_Mode_OUT)
+	{
+		reg = GPIOX[gpiox]->PIDR;
+		reg |= ((uint32_t)1 << pinx);
+		GPIOX[gpiox]->PIDR = reg;
 		
-	if(GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IN)		/*  如果设置为输入则开启输入功能  */
-		GPIOX[gpiox]->PIDR &= ~((uint32_t)1 << pinx);
+		reg = GPIOX[gpiox]->PDDR;
+		reg |= ((uint32_t)1 << pinx);
+		GPIOX[gpiox]->PDDR = reg;
+	}
 	
 	/*  如果开启了上拉  */
 	if(GPIO_InitStruct->GPIO_PuPd == GPIO_PuPd_UP)
@@ -123,7 +137,7 @@ void drv_gpio_Init(GPIO_InitTypeDef *GPIO_InitStruct)
 */
 uint8_t drv_gpio_ReadPin(uint8_t GPIO_Pin)
 {
-	uint8_t pin;
+	uint32_t pin;
 	
 	uint8_t gpiox = 0, pinx = 0;
 	uint8_t pintemp = GPIO_Pin;
@@ -132,9 +146,9 @@ uint8_t drv_gpio_ReadPin(uint8_t GPIO_Pin)
 	pinx = (uint8_t)(pintemp & 0x1f);	/*  计算出GPIO引脚  */
 	
 	/*  读取引脚电平  */
-	pin = GPIOX[gpiox]->PDIR & GPIO_PDIR_PDI(1 << pinx);
+	pin = (uint32_t)GPIOX[gpiox]->PDIR;
 	
-	return pin;
+	return ((pin >> pinx) & 0x01);
 }
 
 /*

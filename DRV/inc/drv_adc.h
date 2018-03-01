@@ -1,80 +1,97 @@
+/**
+  *******************************************************************************************************
+  * File Name: drv_adc.h
+  * Author: Vector
+  * Version: V1.0.0
+  * Date: 2018-3-1
+  * Brief: 本文件为ADC外设提供了底层驱动函数.初始化函数等,同时定义了有关ADC的变量类型,宏定义
+  *******************************************************************************************************
+  * History
+  *		1.Author: Vector
+	*			Date: 2018-3-1
+	*			Mod: 建立文件
+  *
+  *******************************************************************************************************
+  */	
+
 # ifndef __DRV_ADC_H
 # define __DRV_ADC_H
 
+/*
+  *******************************************************************************************************
+  *                              INCLUDE FILES
+  *******************************************************************************************************
+*/
 # include "derivative.h"
 
-
-#define ADC_Channel_0                               ((uint16_t)0x0001)
-#define ADC_Channel_1                               ((uint16_t)0x0002)
-#define ADC_Channel_2                               ((uint16_t)0x0004)
-#define ADC_Channel_3                               ((uint16_t)0x0008)
-#define ADC_Channel_4                               ((uint16_t)0x0010)
-#define ADC_Channel_5                               ((uint16_t)0x0020)
-#define ADC_Channel_6                               ((uint16_t)0x0040)
-#define ADC_Channel_7                               ((uint16_t)0x0080)
-#define ADC_Channel_8                               ((uint16_t)0x0100)
-#define ADC_Channel_9                               ((uint16_t)0x0200)
-#define ADC_Channel_10                              ((uint16_t)0x0400)
-#define ADC_Channel_11                              ((uint16_t)0x0800)
-#define ADC_Channel_12                              ((uint16_t)0x1000)
-#define ADC_Channel_13                              ((uint16_t)0x2000)
-#define ADC_Channel_14                              ((uint16_t)0x4000)
-#define ADC_Channel_15                              ((uint16_t)0x8000)
-
-#define ADC_TwoSamplingDelay_5Cycles               ((uint32_t)0x00000000)
-#define ADC_TwoSamplingDelay_6Cycles               ((uint32_t)0x00000100)
-#define ADC_TwoSamplingDelay_7Cycles               ((uint32_t)0x00000200)
-#define ADC_TwoSamplingDelay_8Cycles               ((uint32_t)0x00000300)
-#define ADC_TwoSamplingDelay_9Cycles               ((uint32_t)0x00000400)
-#define ADC_TwoSamplingDelay_10Cycles              ((uint32_t)0x00000500)
-#define ADC_TwoSamplingDelay_11Cycles              ((uint32_t)0x00000600)
-#define ADC_TwoSamplingDelay_12Cycles              ((uint32_t)0x00000700)
-#define ADC_TwoSamplingDelay_13Cycles              ((uint32_t)0x00000800)
-#define ADC_TwoSamplingDelay_14Cycles              ((uint32_t)0x00000900)
-#define ADC_TwoSamplingDelay_15Cycles              ((uint32_t)0x00000A00)
-#define ADC_TwoSamplingDelay_16Cycles              ((uint32_t)0x00000B00)
-#define ADC_TwoSamplingDelay_17Cycles              ((uint32_t)0x00000C00)
-#define ADC_TwoSamplingDelay_18Cycles              ((uint32_t)0x00000D00)
-#define ADC_TwoSamplingDelay_19Cycles              ((uint32_t)0x00000E00)
-#define ADC_TwoSamplingDelay_20Cycles              ((uint32_t)0x00000F00)
-
-#define ADC_Prescaler_Div2                         ((uint32_t)0x00000000)
-#define ADC_Prescaler_Div4                         ((uint32_t)0x00010000)
-#define ADC_Prescaler_Div6                         ((uint32_t)0x00020000)
-#define ADC_Prescaler_Div8                         ((uint32_t)0x00030000)
+/*  ADC采样通道  */
+# define ADC_Channel_A0                               ((uint32_t)0x00000001)
+# define ADC_Channel_A1                               ((uint32_t)0x00000002)
+# define ADC_Channel_A6                               ((uint32_t)0x00000004)
+# define ADC_Channel_A7                               ((uint32_t)0x00000008)
+# define ADC_Channel_B0                               ((uint32_t)0x00000010)
+# define ADC_Channel_B1                               ((uint32_t)0x00000020)
+# define ADC_Channel_B2                               ((uint32_t)0x00000040)
+# define ADC_Channel_B3                               ((uint32_t)0x00000080)
+# define ADC_Channel_C1                               ((uint32_t)0x00000100)
+# define ADC_Channel_C0                               ((uint32_t)0x00000200)
+# define ADC_Channel_C2                               ((uint32_t)0x00000400)
+# define ADC_Channel_C3                               ((uint32_t)0x00000800)
+# define ADC_Channel_F4                               ((uint32_t)0x00001000)
+# define ADC_Channel_F5                               ((uint32_t)0x00002000)
+# define ADC_Channel_F6                               ((uint32_t)0x00004000)
+# define ADC_Channel_F7                               ((uint32_t)0x00008000)
+# define ADC_Channel_VSS						  	  						((uint32_t)0x00010000)
+# define ADC_Channel_Temperature					  					((uint32_t)0x00020000)
 
 
-#define ADC_Resolution_12b                         ((uint32_t)0x00000008)
-#define ADC_Resolution_10b                         ((uint32_t)0x00000004)
-#define ADC_Resolution_8b                          ((uint32_t)0x00000000)
-typedef enum
-{
-	ADC_FIFO_Disable = 0,
-	ADC_FIFO_Level_2,
-	ADC_FIFO_Level_3,
-	ADC_FIFO_Level_4,
-	ADC_FIFO_Level_5,
-	ADC_FIFO_Level_6,
-	ADC_FIFO_Level_7,
-	ADC_FIFO_Level_8,
-}ADCFIFO_TypeDef;
 
+/*  ADC时钟分频系数  */
+# define ADC_Prescaler_Div1                         ((uint8_t)0x00)
+# define ADC_Prescaler_Div2                         ((uint8_t)0x20)
+# define ADC_Prescaler_Div3                         ((uint8_t)0x40)
+# define ADC_Prescaler_Div4                         ((uint8_t)0x60)
+
+/*  ADC采样位宽  */
+# define ADC_Resolution_12b                         ((uint8_t)0x08)
+# define ADC_Resolution_10b                         ((uint8_t)0x04)
+# define ADC_Resolution_8b                          ((uint8_t)0x00)
+
+/*  ADC时钟源  */
+# define ADC_ClockSource_BusClock				    				((uint8_t)0x00)
+# define ADC_ClockSource_BusClockDiv2								((uint8_t)0x01)
+# define ADC_ClockSource_ALTClock										((uint8_t)0x10)
+# define ADC_ClockSource_ADACKClock				 					((uint8_t)0x11)
+
+/*  ADC参考电压源  */
+# define ADC_RefSource_VREF													((uint8_t)0x00)
+# define ADC_RefSource_VDD													((uint8_t)0x01)
+
+/*  ADC初始化结构体定义  */
 typedef struct
 {
-	uint16_t ADC_Channel;											/*  ADC 通道  */
-	uint8_t ADC_FIFOLevel;										/*  ADC FIFO深度  */
-	uint8_t ADC_IRQCmd;												/*  是否开启中断  */
-	uint32_t ADC_Resolution;									/*  ADC数据位数  */
-  FunctionalState ADC_ScanConvMode;					/*  扫描模式  */
-	FunctionalState ADC_ContinuousConvMode;		/*  连续转换  */
-//	uint32_t ADC_TwoSamplingDelay;					/*  采样间隔  */
-	uint32_t ADC_Prescaler;										/*  ADC时钟分频  */
-	uint32_t ADC_TrigConvMode;								/*  ADC采样触发模式  */
+	uint32_t ADC_Channel;							/*  ADC 通道  */
+	uint8_t ADC_ChannelCount;						/*  ADC通道数,也就是FIFO深度  */
+	uint8_t ADC_IRQCmd;								/*  是否开启中断  */
+	uint8_t ADC_Resolution;							/*  ADC数据位数  */
+	FunctionalState ADC_ScanConvMode;				/*  扫描模式  */
+	FunctionalState ADC_ContinuousConvMode;			/*  连续转换  */
+	uint8_t ADC_Prescaler;							/*  ADC时钟分频  */
+	uint8_t ADC_ClockSource;						/*  ADC时钟源  */
+	uint8_t ADC_RefSource;							/*  ADC参考基准源  */
 }ADC_InitTypeDef;
 
 
+/*
+  *******************************************************************************************************
+  *                              FUNCTION DECLARE
+  *******************************************************************************************************
+*/
 void drv_adc_Init(ADC_InitTypeDef *ADC_InitStruct);
-
+void drv_adc_GetMultiADCResult(uint16_t *ADCBuff);
+uint16_t drv_adc_GetSingleADCResult(uint32_t ADC_Channel);
+uint16_t drv_adc_ConvOnce(uint32_t ADC_Channel, uint8_t ADC_Resolution);
+void drv_adc_StartConv(void);
 
 # endif
 
